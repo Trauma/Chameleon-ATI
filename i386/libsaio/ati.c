@@ -1,7 +1,9 @@
 /*
  *  ATI injector
  *
- *  Copyright (C) 2009  Jasmin Fazlic, iNDi, netkas
+ *  Copyright (C) 2009  Jasmin Fazlic, iNDi, netkas 
+ * 
+ *  Evergreen support and code revision by Trauma (2010)
  *
  *  ATI injector is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,9 +17,8 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with ATI injector.  If not, see <http://www.gnu.org/licenses/>.
- */ 
-/*
- * Alternatively you can choose to comply with APSL
+ *
+ *  Alternatively you can choose to comply with APSL
  */
  
  
@@ -34,7 +35,7 @@
 #endif
 
 #if DEBUG_ATI
-#define DBG(x...)	printf(x)
+#define DBG(x...)	verbose(x)
 #else
 #define DBG(x...)
 #endif
@@ -45,140 +46,119 @@
 
 extern uint32_t devices_number;
 
-const char *ati_compatible_0[]			= { "@0,compatible", "ATY,%s" };
-const char *ati_compatible_1[]			= { "@1,compatible", "ATY,%s" };
-const char *ati_device_type_0[]			= { "@0,device_type", "display" };
-const char *ati_device_type_1[]			= { "@1,device_type", "display" };
-const char *ati_device_type[]			= { "device_type", "ATY,%sParent" };
-const char *ati_name_0[]			= { "@0,name", "ATY,%s" };
-const char *ati_name_1[]			= { "@1,name", "ATY,%s" };
-const char *ati_name[]				= { "name", "ATY,%sParent" };
-const char *ati_efidisplay_0[]			= { "@0,ATY,EFIDisplay", "TMDSB" };
-struct ati_data_key ati_connector_type_0	= { 0x04, "@0,connector-type", {0x00, 0x04, 0x00, 0x00} };
-struct ati_data_key ati_connector_type_1	= { 0x04, "@1,connector-type", {0x04, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_display_con_fl_type_0	= { 0x04, "@0,display-connect-flags", {0x00, 0x00, 0x04, 0x00} };
-const char *ati_display_type_0[]		= { "@0,display-type", "LCD" };
-const char *ati_display_type_1[]		= { "@1,display-type", "NONE" };
-struct ati_data_key ati_aux_power_conn		= { 0x04, "AAPL,aux-power-connected", {0x01, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_backlight_ctrl		= { 0x04, "AAPL,backlight-control", {0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_aapl01_coher		= { 0x04, "AAPL01,Coherency", {0x01, 0x00, 0x00, 0x00} };
-const char *ati_card_no[]			= { "ATY,Card#", "109-B77101-00" };
-const char *ati_copyright[]			= { "ATY,Copyright", "Copyright AMD Inc. All Rights Reserved. 2005-2009" };
-const char *ati_efi_compile_d[]			= { "ATY,EFICompileDate", "Jan 26 2009" };
-struct ati_data_key ati_efi_disp_conf		= { 0x08, "ATY,EFIDispConfig", {0x45, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01} };
-struct ati_data_key ati_efi_drv_type		= { 0x01, "ATY,EFIDriverType", {0x02} };
-struct ati_data_key ati_efi_enbl_mode		= { 0x01, "ATY,EFIEnabledMode", {0x01} };
-struct ati_data_key ati_efi_init_stat		= { 0x04, "ATY,EFIHWInitStatus", {0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_efi_orientation		= { 0x02, "ATY,EFIOrientation", {0x02, 0x00} };
-const char *ati_efi_version[]			= { "ATY,EFIVersion", "01.00.318" };
-const char *ati_efi_versionB[]			= { "ATY,EFIVersionB", "113-SBSJ1G04-00R-02" };
-const char *ati_efi_versionE[]			= { "ATY,EFIVersionE", "113-B7710A-318" };
-struct ati_data_key ati_mclk			= { 0x04, "ATY,MCLK", {0x70, 0x2e, 0x11, 0x00} };
-struct ati_data_key ati_mem_rev_id		= { 0x02, "ATY,MemRevisionID", {0x03, 0x00} };
-struct ati_data_key ati_mem_vend_id		= { 0x02, "ATY,MemVendorID", {0x02, 0x00} };
-const char *ati_mrt[]				= { "ATY,MRT", " " };
-const char *ati_romno[]				= { "ATY,Rom#", "113-B7710C-176" };
-struct ati_data_key ati_sclk			= { 0x04, "ATY,SCLK", {0x28, 0xdb, 0x0b, 0x00} };
-struct ati_data_key ati_vendor_id		= { 0x02, "ATY,VendorID", {0x02, 0x10} };
-struct ati_data_key ati_platform_info		= { 0x80, "ATY,PlatformInfo", {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_mvad			= { 0x40, "MVAD", {0x3f, 0x5c, 0x82, 0x02, 0xff, 0x90, 0x00, 0x54, 0x60, 0x00, 0xac, 0x10, 0xa0, 0x17, 0x00, 0x03, 0xb0, 0x68, 0x00, 0x0a, 0xa0, 0x0a, 0x30, 0x00, 0x20, 0x00, 0x40, 0x06, 0x6e, 0x06, 0x03, 0x00, 0x06, 0x00, 0x40, 0x06, 0x00, 0x0a, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x21, 0x00, 0x10, 0x06, 0x92, 0x20, 0x00, 0x03} };
-struct ati_data_key ati_saved_config		= { 0x100, "saved-config", {0x3f, 0x5c, 0x82, 0x02, 0xff, 0x90, 0x00, 0x54, 0x60, 0x00, 0xac, 0x10, 0xa0, 0x17, 0x00, 0x03, 0xb0, 0x68, 0x00, 0x0a, 0xa0, 0x0a, 0x30, 0x00, 0x20, 0x00, 0x40, 0x06, 0x6e, 0x06, 0x03, 0x00, 0x06, 0x00, 0x40, 0x06, 0x00, 0x0a, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x21, 0x00, 0x10, 0x06, 0x92, 0x20, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xee, 0x02, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x31, 0x30, 0x50, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x32, 0x32, 0x32, 0x01, 0x00, 0x00, 0x00, 0x00, 0x02, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
-///non 48xx keys
-const char *ati_efidisplay_0_n4[]		= { "@0,ATY,EFIDisplay", "TMDSA" };
-struct ati_data_key ati_connector_type_0_n4	= { 0x04, "@0,connector-type", {0x04, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_connector_type_1_n4	= { 0x04, "@1,connector-type", {0x00, 0x02, 0x00, 0x00} };
-struct ati_data_key ati_aapl_emc_disp_list_n4	= { 0x40, "AAPL,EMC-Display-List", {0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x10, 0x00, 0x00, 0x1b, 0x92, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x10, 0x00, 0x00, 0x1c, 0x92, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x10, 0x00, 0x00, 0x21, 0x92, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_fb_offset_n4		= { 0x08, "ATY,FrameBufferOffset", {0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_hwgpio_n4		= { 0x04, "ATY,HWGPIO", {0x23, 0xa8, 0x48, 0x00} };
-struct ati_data_key ati_iospace_offset_n4	= { 0x08, "ATY,IOSpaceOffset", {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00} };
-struct ati_data_key ati_mclk_n4			= { 0x04, "ATY,MCLK", {0x00, 0x35, 0x0c, 0x00} };
-struct ati_data_key ati_sclk_n4			= { 0x04, "ATY,SCLK", {0x60, 0xae, 0x0a, 0x00} };
-struct ati_data_key ati_refclk_n4		= { 0x04, "ATY,RefCLK", {0x8c, 0x0a, 0x00, 0x00} };
-struct ati_data_key ati_regspace_offset_n4	= { 0x08, "ATY,RegisterSpaceOffset", {0x00, 0x00, 0x00, 0x00, 0x90, 0xa2, 0x00, 0x00} };
-struct ati_data_key ati_vram_memsize_0		= { 0x08, "@0,VRAM,memsize", {0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_vram_memsize_1		= { 0x08, "@1,VRAM,memsize", {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_aapl_blackscr_prefs_0_n4= { 0x04, "AAPL00,blackscreen-preferences", {0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_aapl_blackscr_prefs_1_n4= { 0x04, "AAPL01,blackscreen-preferences", {0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_swgpio_info_n4		= { 0x04, "ATY,SWGPIO Info", {0x00, 0x48, 0xa8, 0x23} };
-struct ati_data_key ati_efi_orientation_n4	= { 0x01, "ATY,EFIOrientation", {0x08} };
-struct ati_data_key ati_mvad_n4			= { 0x100, "MVAD", {0x3e, 0x5c, 0x82, 0x00, 0xff, 0x90, 0x00, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x28, 0x3c, 0x80, 0x07, 0x20, 0x08, 0x30, 0x00, 0x20, 0x00, 0xb0, 0x04, 0xd3, 0x04, 0x03, 0x00, 0x06, 0x00, 0xb0, 0x04, 0x80, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x90, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x31, 0x30, 0x50, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x32, 0x32, 0x32, 0x01, 0x00, 0x00, 0x00, 0x00, 0x02, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
-struct ati_data_key ati_saved_config_n4		= { 0x100, "saved-config", {0x3e, 0x5c, 0x82, 0x00, 0xff, 0x90, 0x00, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x28, 0x3c, 0x80, 0x07, 0x20, 0x08, 0x30, 0x00, 0x20, 0x00, 0xb0, 0x04, 0xd3, 0x04, 0x03, 0x00, 0x06, 0x00, 0xb0, 0x04, 0x80, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x90, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x31, 0x30, 0x50, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x32, 0x32, 0x32, 0x01, 0x00, 0x00, 0x00, 0x00, 0x02, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
+// Shared Radeon HD keys
+const char *ati_efidisplay_0[]					  = { "@0,ATY,EFIDisplay", "TMDSA" };
+const char *ati_compatible_0[]					  = { "@0,compatible", "ATY,%s" };
+const char *ati_compatible_1[]					  = { "@1,compatible", "ATY,%s" };
+const char *ati_device_type_0[]					  = { "@0,device_type", "display" };
+const char *ati_device_type_1[]					  = { "@1,device_type", "display" };
+const char *ati_device_type[]					  = { "device_type", "ATY,%sParent" };
+const char *ati_name_0[]						  = { "@0,name", "ATY,%s" };
+const char *ati_name_1[]						  = { "@1,name", "ATY,%s" };
+const char *ati_name[]							  = { "name", "ATY,%sParent" };
+const char *ati_efi_version[]					  = { "ATY,EFIVersion", "Chameleon" };
+struct ati_data_key ati_vendor_id				  = { 0x02, "ATY,VendorID", {0x02, 0x10} };
+struct ati_data_key ati_vram_memsize_0			  = { 0x08, "@0,VRAM,memsize", {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
+struct ati_data_key ati_vram_memsize_1			  = { 0x08, "@1,VRAM,memsize", {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
 
-struct pcir_s {
-	uint32_t signature;
-	uint16_t vid;
-	uint16_t devid;
-};
+// Evergreen keys
+const char *ati_compatible_2[]					  = { "@2,compatible", "ATY,%s" };
+const char *ati_device_type_2[]					  = { "@2,device_type", "display" };
+const char *ati_name_2[]						  = { "@2,name", "ATY,%s" };
+const char *ati_hda_gfx[]						  = { "hda-gfx", "onboard-1" };
+struct ati_data_key ati_aapl_blackscr_prefs_2	  = { 0x04, "AAPL02,blackscreen-preferences", {0x00, 0x00, 0x00, 0x00} };
+struct ati_data_key ati_aapl02_coher			  = { 0x04, "AAPL02,Coherency", {0x02, 0x00, 0x00, 0x00} };
+struct ati_data_key ati_vram_memsize_2			  = { 0x08, "@2,VRAM,memsize", {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} };
 
-// Known cards as of 2008/08/26
+// Legacy Radeon HD keys
+struct ati_data_key ati_fb_offset_leg			  = { 0x08, "ATY,FrameBufferOffset", {0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00} };
+struct ati_data_key ati_hwgpio_leg				  = { 0x04, "ATY,HWGPIO", {0x23, 0xa8, 0x48, 0x00} };
+struct ati_data_key ati_iospace_offset_leg		  = { 0x08, "ATY,IOSpaceOffset", {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00} };
+struct ati_data_key ati_mclk_leg				  = { 0x04, "ATY,MCLK", {0x00, 0x35, 0x0c, 0x00} };
+struct ati_data_key ati_sclk_leg				  = { 0x04, "ATY,SCLK", {0x60, 0xae, 0x0a, 0x00} };
+struct ati_data_key ati_refclk_leg				  = { 0x04, "ATY,RefCLK", {0x8c, 0x0a, 0x00, 0x00} };
+struct ati_data_key ati_regspace_offset_leg		  = { 0x08, "ATY,RegisterSpaceOffset", {0x00, 0x00, 0x00, 0x00, 0x90, 0xa2, 0x00, 0x00} };
+struct ati_data_key ati_aapl01_coher			  = { 0x04, "AAPL01,Coherency", {0x02, 0x00, 0x00, 0x00} };
+struct ati_data_key ati_aapl_blackscr_prefs_0_leg = { 0x04, "AAPL00,blackscreen-preferences", {0x00, 0x00, 0x00, 0x00} };
+struct ati_data_key ati_aapl_blackscr_prefs_1_leg = { 0x04, "AAPL01,blackscreen-preferences", {0x00, 0x00, 0x00, 0x00} };
+struct ati_data_key ati_swgpio_info_leg			  = { 0x04, "ATY,SWGPIO Info", {0x00, 0x48, 0xa8, 0x23} };
+
+// Known cards as of 2010/08/28
 static struct ati_chipsets_t ATIKnownChipsets[] = {
-	{ 0x00000000, "Unknown" } ,
-	{ 0x10029589,  "ATI Radeon 2600 Series"}  ,
-	{ 0x10029588,  "ATI Radeon 2600 Series"}  ,
-	{ 0x100294C3,  "ATI Radeon 2400 Series"}  ,
-	{ 0x100294C4,  "ATI Radeon 2400 Series"}  ,
-	{ 0x100294C6,  "ATI Radeon 2400 Series"}  ,
-	{ 0x10029400,  "ATI Radeon 2900 Series"}  ,
-	{ 0x10029405,  "ATI Radeon 2900GT Series"}  ,
-	{ 0x10029581,  "ATI Radeon 2600 Series"}  ,
-	{ 0x10029583,  "ATI Radeon 2600 Series"}  ,
-	{ 0x10029586,  "ATI Radeon 2600 Series"}  ,
-	{ 0x10029587,  "ATI Radeon 2600 Series"}  ,
-	{ 0x100294C9,  "ATI Radeon 2400 Series"}  ,
-	{ 0x10029501,  "ATI Radeon 3800 Series"}  ,
-	{ 0x10029505,  "ATI Radeon 3800 Series"}  ,
-	{ 0x10029515,  "ATI Radeon 3800 Series"}  ,
-	{ 0x10029507,  "ATI Radeon 3800 Series"}  ,
-	{ 0x10029500,  "ATI Radeon 3800 Series"}  ,
-	{ 0x1002950F,  "ATI Radeon 3800X2 Series"}  ,
-	{ 0x100295C5,  "ATI Radeon 3400 Series"}  ,
-	{ 0x100295C7,  "ATI Radeon 3400 Series"}  ,
-	{ 0x100295C0,  "ATI Radeon 3400 Series"}  ,
-	{ 0x10029596,  "ATI Radeon 3600 Series"}  ,
-	{ 0x10029590,  "ATI Radeon 3600 Series"}  ,
-	{ 0x10029599,  "ATI Radeon 3600 Series"}  ,
-	{ 0x10029597,  "ATI Radeon 3600 Series"}  ,
-	{ 0x10029598,  "ATI Radeon 3600 Series"}  ,
-	{ 0x10029442,  "ATI Radeon 4850 Series"}  ,
-	{ 0x10029440,  "ATI Radeon 4870 Series"}  ,
-	{ 0x1002944C,  "ATI Radeon 4830 Series"}  ,
-	{ 0x10029460,  "ATI Radeon 4890 Series"}  ,
-	{ 0x10029462,  "ATI Radeon 4890 Series"}  ,
-	{ 0x10029441,  "ATI Radeon 4870X2 Series"}  ,
-	{ 0x10029443,  "ATI Radeon 4850X2 Series"}  ,
-	{ 0x10029444,  "ATI Radeon 4800 Series"}  ,
-	{ 0x10029446,  "ATI Radeon 4800 Series"}  ,
-	{ 0x1002944E,  "ATI Radeon 4730 Series"}  ,
-	{ 0x10029450,  "ATI Radeon 4800 Series"}  ,
-	{ 0x10029452,  "ATI Radeon 4800 Series"}  ,		
-	{ 0x10029456,  "ATI Radeon 4800 Series"}  ,		
-	{ 0x1002944A,  "ATI Radeon 4800 Mobility Series"}  ,
-	{ 0x1002945A,  "ATI Radeon 4800 Mobility Series"}  ,
-	{ 0x1002945B,  "ATI Radeon 4800 Mobility Series"}  ,
-	{ 0x1002944B,  "ATI Radeon 4800 Mobility Series"}  ,
-        { 0x10029490,  "ATI Radeon 4670 Series"}  ,
-        { 0x10029498,  "ATI Radeon 4650 Series"}  ,
-	{ 0x10029490,  "ATI Radeon 4600 Series"}  ,
-	{ 0x10029498,  "ATI Radeon 4600 Series"}  ,
-	{ 0x1002949E,  "ATI Radeon 4600 Series"}  ,
-	{ 0x10029480,  "ATI Radeon 4600 Series"}  ,
-	{ 0x10029488,  "ATI Radeon 4600 Series"}  ,
-	{ 0x10029540,  "ATI Radeon 4500 Series"}  ,
-	{ 0x10029541,  "ATI Radeon 4500 Series"}  ,
-	{ 0x1002954E,  "ATI Radeon 4500 Series"}  ,
-	{ 0x10029552,  "ATI Radeon 4300 Mobility Series"}  ,
-	{ 0x10029553,  "ATI Radeon 4500 Mobility Series"}  ,
-	{ 0x1002954F,  "ATI Radeon 4300 Series"} ,
-        { 0x100294B3,  "ATI Radeon 4770 Series"} ,
-        { 0x100294B5,  "ATI Radeon 4770 Series"} ,
-        { 0x100268B8,  "ATI Radeon 5700 Series"} ,
-        { 0x100268BE,  "ATI Radeon 5700 Series"} ,
-        { 0x10026898,  "ATI Radeon 5800 Series"} ,
-        { 0x10026899,  "ATI Radeon 5800 Series"}
+	{ 0x00000000,  "Unknown" } ,
+	{ 0x100294C3,  "ATI Radeon HD 2400 Series"}  ,
+	{ 0x100294C4,  "ATI Radeon HD 2400 Series"}  ,
+	{ 0x100294C6,  "ATI Radeon HD 2400 Series"}  ,
+	{ 0x100294C9,  "ATI Radeon HD 2400 Series"}  ,
+	{ 0x10029589,  "ATI Radeon HD 2600 Series"}  ,
+	{ 0x10029588,  "ATI Radeon HD 2600 Series"}  ,
+	{ 0x10029581,  "ATI Radeon HD 2600 Series"}  ,
+	{ 0x10029583,  "ATI Radeon HD 2600 Series"}  ,
+	{ 0x10029586,  "ATI Radeon HD 2600 Series"}  ,
+	{ 0x10029587,  "ATI Radeon HD 2600 Series"}  ,
+	{ 0x10029400,  "ATI Radeon HD 2900 Series"}  ,
+	{ 0x10029405,  "ATI Radeon HD 2900 GT"}  ,
+	{ 0x10029501,  "ATI Radeon HD 3800 Series"}  ,
+	{ 0x10029505,  "ATI Radeon HD 3800 Series"}  ,
+	{ 0x10029515,  "ATI Radeon HD 3800 Series"}  ,
+	{ 0x10029507,  "ATI Radeon HD 3800 Series"}  ,
+	{ 0x10029500,  "ATI Radeon HD 3800 Series"}  ,
+	{ 0x1002950F,  "ATI Radeon HD 3800 X2"}  ,
+	{ 0x100295C5,  "ATI Radeon HD 3400 Series"}  ,
+	{ 0x100295C7,  "ATI Radeon HD 3400 Series"}  ,
+	{ 0x100295C0,  "ATI Radeon HD 3400 Series"}  ,
+	{ 0x10029596,  "ATI Radeon HD 3600 Series"}  ,
+	{ 0x10029590,  "ATI Radeon HD 3600 Series"}  ,
+	{ 0x10029599,  "ATI Radeon HD 3600 Series"}  ,
+	{ 0x10029597,  "ATI Radeon HD 3600 Series"}  ,
+	{ 0x10029598,  "ATI Radeon HD 3600 Series"}  ,
+	{ 0x10029442,  "ATI Radeon HD 4850"}  ,
+	{ 0x10029440,  "ATI Radeon HD 4870"}  ,
+	{ 0x1002944C,  "ATI Radeon HD 4830"}  ,
+	{ 0x10029460,  "ATI Radeon HD 4890"}  ,
+	{ 0x10029462,  "ATI Radeon HD 4890"}  ,
+	{ 0x10029441,  "ATI Radeon HD 4870 X2"}  ,
+	{ 0x10029443,  "ATI Radeon HD 4850 X2"}  ,
+	{ 0x10029444,  "ATI Radeon HD 4800 Series"}  ,
+	{ 0x10029446,  "ATI Radeon HD 4800 Series"}  ,
+	{ 0x1002944E,  "ATI Radeon HD 4730"}  ,
+	{ 0x10029450,  "ATI Radeon HD 4800 Series"}  ,
+	{ 0x10029452,  "ATI Radeon HD 4800 Series"}  ,		
+	{ 0x10029456,  "ATI Radeon HD 4800 Series"}  ,		
+	{ 0x1002944A,  "ATI Radeon HD 4800 Mobility Series"}  ,
+	{ 0x1002945A,  "ATI Radeon HD 4800 Mobility Series"}  ,
+	{ 0x1002945B,  "ATI Radeon HD 4800 Mobility Series"}  ,
+	{ 0x1002944B,  "ATI Radeon HD 4800 Mobility Series"}  ,
+	{ 0x10029490,  "ATI Radeon HD 4670"}  ,
+	{ 0x10029498,  "ATI Radeon HD 4650"}  ,
+	{ 0x10029490,  "ATI Radeon HD 4600 Series"}  ,
+	{ 0x10029498,  "ATI Radeon HD 4600 Series"}  ,
+	{ 0x1002949E,  "ATI Radeon HD 4600 Series"}  ,
+	{ 0x10029480,  "ATI Radeon HD 4600 Series"}  ,
+	{ 0x10029488,  "ATI Radeon HD 4600 Series"}  ,
+	{ 0x10029540,  "ATI Radeon HD 4500 Series"}  ,
+	{ 0x10029541,  "ATI Radeon HD 4500 Series"}  ,
+	{ 0x1002954E,  "ATI Radeon HD 4500 Series"}  ,
+	{ 0x10029552,  "ATI Radeon HD 4300 Mobility Series"}  ,
+	{ 0x10029553,  "ATI Radeon HD 4500 Mobility Series"}  ,
+	{ 0x1002954F,  "ATI Radeon HD 4300 Series"} ,
+	{ 0x100294B3,  "ATI Radeon HD 4770"} ,
+	{ 0x100268F9,  "ATI Radeon HD 5400 Series"} ,
+	{ 0x100268D9,  "ATI Radeon HD 5500 Series"} ,
+	{ 0x100268DA,  "ATI Radeon HD 5500 Series"} ,
+	{ 0x100268B9,  "ATI Radeon HD 5600 Series"} ,
+	{ 0x100268D8,  "ATI Radeon HD 5670"} ,
+	{ 0x100268B8,  "ATI Radeon HD 5770"} ,
+	{ 0x100268BE,  "ATI Radeon HD 5750"} ,
+	{ 0x10026898,  "ATI Radeon HD 5870"} ,
+	{ 0x10026899,  "ATI Radeon HD 5850"} ,
+	{ 0x1002689E,  "ATI Radeon HD 5830"} ,
+	{ 0x1002689C,  "ATI Radeon HD 5970"}
 };
 
+// Default known working framebuffers
 static struct ati_chipsets_t ATIKnownFramebuffers[] = {
-	{ 0x00000000, "Megalodon" },
+	{ 0x00000000,  "Megalodon" },
 	{ 0x10029589,  "Lamna"}  ,
 	{ 0x10029588,  "Lamna"}  ,
 	{ 0x100294C3,  "Iago"}  ,
@@ -222,23 +202,30 @@ static struct ati_chipsets_t ATIKnownFramebuffers[] = {
 	{ 0x1002945A,  "Motmot"}  ,
 	{ 0x1002945B,  "Motmot"}  ,
 	{ 0x1002944B,  "Motmot"}  ,
-        { 0x10029490,  "Peregrine"}  ,
-        { 0x10029498,  "Peregrine"}  ,
-        { 0x1002949E,  "Peregrine"}  ,
-        { 0x10029480,  "Peregrine"}  ,
-        { 0x10029488,  "Peregrine"}  ,
-        { 0x10029540,  "Peregrine"}  ,
-        { 0x10029541,  "Peregrine"}  ,
-        { 0x1002954E,  "Peregrine"}  ,
-        { 0x10029552,  "Peregrine"}  ,
-        { 0x10029553,  "Peregrine"}  ,
-        { 0x1002954F,  "Peregrine"}  ,
-        { 0x100294B3,  "Peregrine"},
-        { 0x100294B5,  "Peregrine"},
-        { 0x100268B8,  "Motmot"},
-        { 0x100268BE,  "Motmot"},
-        { 0x10026898,  "Motmot"},
-        { 0x10026899,  "Motmot"}
+	{ 0x10029490,  "Peregrine"}  ,
+	{ 0x10029498,  "Peregrine"}  ,
+	{ 0x1002949E,  "Peregrine"}  ,
+	{ 0x10029480,  "Peregrine"}  ,
+	{ 0x10029488,  "Peregrine"}  ,
+	{ 0x10029540,  "Peregrine"}  ,
+	{ 0x10029541,  "Peregrine"}  ,
+	{ 0x1002954E,  "Peregrine"}  ,
+	{ 0x10029552,  "Peregrine"}  ,
+	{ 0x10029553,  "Peregrine"}  ,
+	{ 0x1002954F,  "Peregrine"}  ,
+	{ 0x100294B3,  "Peregrine"},
+	{ 0x100294B5,  "Peregrine"},
+	{ 0x100268F9,  "Uakari"} ,
+	{ 0x100268D9,  "Uakari"} ,
+	{ 0x100268DA,  "Uakari"} ,
+	{ 0x100268B9,  "Vervet"} , 
+	{ 0x100268d8,  "Baboon"} ,
+	{ 0x100268B8,  "Vervet"} ,
+	{ 0x100268BE,  "Vervet"} ,
+	{ 0x10026898,  "Uakari"} ,
+	{ 0x10026899,  "Uakari"} ,
+	{ 0x1002689c,  "Uakari"} ,
+	{ 0x1002689e,  "Uakari"}
 };
 
 static uint32_t accessROM(pci_dt_t *ati_dev, unsigned int mode)
@@ -316,14 +303,11 @@ static uint8_t *readAtomBIOS(pci_dt_t *ati_dev)
 	accessROM((pci_dt_t *)regs, 1);
 
 	if (*(uint16_t *)BIOSBase != 0xAA55) {
-		printf("Wrong BIOS signature: %04x\n", *(uint16_t *)BIOSBase);
+		verbose("Wrong ATI BIOS signature: %04x\n", *(uint16_t *)BIOSBase);
 		return 0;
 	}
 	return (uint8_t *)BIOSBase;
 }
-
-#define R5XX_CONFIG_MEMSIZE	0x00F8
-#define R6XX_CONFIG_MEMSIZE	0x5428
 
 uint32_t getvramsizekb(pci_dt_t *ati_dev)
 {
@@ -334,53 +318,40 @@ uint32_t getvramsizekb(pci_dt_t *ati_dev)
 	bar[2] = pci_config_read32(ati_dev->dev.addr, 0x18 );
 	regs = (uint32_t *) (bar[2] & ~0x0f);
 	if (ati_dev->device_id < 0x9400) {
-		size = (REG32R(R5XX_CONFIG_MEMSIZE)) >> 10;
+		size = (REG32R(R6XX_CONFIG_MEMSIZE) >> 10);
+		size = size * 1024 * 1024;
 	} else {
 		size = (REG32R(R6XX_CONFIG_MEMSIZE)) >> 10;
 	}
 	return size;
 }
 
-#define AVIVO_D1CRTC_CONTROL	0x6080
-#define AVIVO_CRTC_EN		(1<<0)
-#define AVIVO_D2CRTC_CONTROL	0x6880
-
 static bool radeon_card_posted(pci_dt_t *ati_dev)
 {
-	// if devid matches biosimage(from legacy) devid - posted card, fails with X2/crossfire cards.
-/*	char *biosimage = 0xC0000;
-	
-	if ((uint8_t)biosimage[0] == 0x55 && (uint8_t)biosimage[1] == 0xaa)
-	{
-		struct  pci_rom_pci_header_t *rom_pci_header;   
-		rom_pci_header = (struct pci_rom_pci_header_t*)(biosimage + (uint8_t)biosimage[24] + (uint8_t)biosimage[25]*256);
-	
-    	if (rom_pci_header->signature == 0x52494350)
-		{
-     		if (rom_pci_header->device == ati_dev->device_id)
-			{
-				return true;
-				printf("Card was POSTed\n");
-			}
-		}
-	}
-	return false;
-	printf("Card was not POSTed\n");
-	*/
-	//fails yet
 	uint32_t		bar[7];
 	uint32_t		val;
 	volatile uint32_t	*regs;
-
+	uint8_t *biosimage = (uint8_t *)0x000C0000;
+	
 	bar[2] = pci_config_read32(ati_dev->dev.addr, 0x18);
 	regs = (uint32_t *) (bar[2] & ~0x0f);
-
-	val = REG32R(AVIVO_D1CRTC_CONTROL) | REG32R(AVIVO_D2CRTC_CONTROL);
-	if (val & AVIVO_CRTC_EN) {
+	val = (REG32R(AVIVO_D1CRTC_CONTROL) | REG32R(AVIVO_D2CRTC_CONTROL));
+	
+	if (val & AVIVO_CRTC_EN) { // Fail on evergreen cards 
+		verbose("ATI card was POSTed AVIVO way\n");
 		return true;
-	} else {
-		return false;
+	} else if ((uint8_t)biosimage[0] == 0x55 && (uint8_t)biosimage[1] == 0xaa) { // Evergreen's alternative, but should fail on X2/CrossFire
+		struct  pci_rom_pci_header_t *rom_pci_header;   
+		rom_pci_header = (struct pci_rom_pci_header_t*)(biosimage + (uint8_t)biosimage[24] + (uint8_t)biosimage[25]*256);
+		if (rom_pci_header->signature == 0x52494350) {
+			if (rom_pci_header->device == ati_dev->device_id) {
+				verbose("ATI card was POSTed PCI ROM way\n");
+				return true;
+			}
+		}
 	}
+	verbose("ATI card was not POSTed\n"); // Both alternatives failed, then will try readAtomBIOS method
+	return false;
 }
 
 static uint32_t load_ati_bios_file(const char *filename, uint8_t *buf, int bufsize)
@@ -393,7 +364,7 @@ static uint32_t load_ati_bios_file(const char *filename, uint8_t *buf, int bufsi
 	}
 	size = file_size(fd);
 	if (size > bufsize) {
-		printf("Filesize of %s is bigger than expected! Truncating to 0x%x Bytes!\n", filename, bufsize);
+		verbose("Filesize of %s is bigger than expected! Truncating to 0x%x Bytes!\n", filename, bufsize);
 		size = bufsize;
 	}
 	size = read(fd, (char *)buf, size);
@@ -433,7 +404,7 @@ static int devprop_add_iopciconfigspace(struct DevPropDevice *device, pci_dt_t *
 	if (!device || !ati_dev) {
 		return 0;
 	}
-	printf("dumping pci config space, 256 bytes\n");
+	verbose("Dumping PCI config space, 256 bytes\n");
 	config_space = malloc(256);
 	for (i=0; i<=255; i++) {
 		config_space[i] = pci_config_read8( ati_dev->dev.addr, i);
@@ -443,176 +414,59 @@ static int devprop_add_iopciconfigspace(struct DevPropDevice *device, pci_dt_t *
 	return 1;
 }
 
-static int devprop_add_ati_template_4xxx(struct DevPropDevice *device)
+static int devprop_add_ati_template_shared(struct DevPropDevice *device)
 {
 	if(!device)
-		return 0;
-	
-//	if(!DP_ADD_TEMP_VAL(device, ati_compatible_0))
-//		return 0;
-//	if(!DP_ADD_TEMP_VAL(device, ati_compatible_1))
-//		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_device_type_0))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_device_type_1))
-		return 0;
-//	if(!DP_ADD_TEMP_VAL(device, ati_device_type))
-//		return 0;
-//	if(!DP_ADD_TEMP_VAL(device, ati_name_0))
-//		return 0;
-//	if(!DP_ADD_TEMP_VAL(device, ati_name_1))
-//		return 0;
-//	if(!DP_ADD_TEMP_VAL(device, ati_name))
-//		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efidisplay_0))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_display_type_0))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_display_type_1))
-		return 0;
-//	if(!DP_ADD_TEMP_VAL(device, ati_slot_name))
-//		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_card_no))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_copyright))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efi_compile_d))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efi_version))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efi_versionB))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efi_versionE))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_mrt))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_romno))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_name_1))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_connector_type_0))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_connector_type_1))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_display_con_fl_type_0))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aux_power_conn))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_backlight_ctrl))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl01_coher))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_disp_conf))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_drv_type))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_enbl_mode))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_init_stat))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_orientation))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_mclk))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_mem_rev_id))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_mem_vend_id))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_sclk))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_vendor_id))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_platform_info))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_mvad))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_saved_config))
-		return 0;
-	return 1;
-}
-
-static int devprop_add_ati_template(struct DevPropDevice *device)
-{
-	if(!device)
-		return 0;
-
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_platform_info))
 		return 0;	
 	if(!DP_ADD_TEMP_VAL(device, ati_device_type_0))
 		return 0;
 	if(!DP_ADD_TEMP_VAL(device, ati_device_type_1))
 		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efidisplay_0_n4))
-		return 0;
-//	if(!DP_ADD_TEMP_VAL(device, ati_slot_name_n4))
-//		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_card_no))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_copyright))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efi_compile_d))
+	if(!DP_ADD_TEMP_VAL(device, ati_efidisplay_0))
 		return 0;
 	if(!DP_ADD_TEMP_VAL(device, ati_efi_version))
 		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efi_versionB))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_efi_versionE))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_mrt))
-		return 0;
-	if(!DP_ADD_TEMP_VAL(device, ati_romno))
-		return 0;
 	if(!DP_ADD_TEMP_VAL(device, ati_name_1))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_connector_type_0_n4))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_connector_type_1_n4))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aux_power_conn))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_backlight_ctrl))
 		return 0;
 	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl01_coher))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_drv_type))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_enbl_mode))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_mem_rev_id))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_mem_vend_id))
-		return 0;
 	if(!DP_ADD_TEMP_VAL_DATA(device, ati_vendor_id))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl_emc_disp_list_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl_blackscr_prefs_0_leg))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_fb_offset_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl_blackscr_prefs_1_leg))
+		return 0;	
+	return 1;
+}
+
+static int devprop_add_ati_template_evergreen(struct DevPropDevice *device)
+{
+	if(!device)
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_hwgpio_n4))
+	if(!DP_ADD_TEMP_VAL(device, ati_hda_gfx))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_iospace_offset_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl02_coher))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_mclk_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl_blackscr_prefs_2))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_sclk_n4))
+	return 1;
+}
+
+static int devprop_add_ati_template_leg(struct DevPropDevice *device)
+{
+	if(!device)
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_refclk_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_hwgpio_leg))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_regspace_offset_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_iospace_offset_leg))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_orientation_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_regspace_offset_leg))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl_blackscr_prefs_0_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl_blackscr_prefs_0_leg))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl_blackscr_prefs_1_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_aapl_blackscr_prefs_1_leg))
 		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_swgpio_info_n4))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_efi_orientation_n4))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_mvad_n4))
-		return 0;
-	if(!DP_ADD_TEMP_VAL_DATA(device, ati_saved_config_n4))
+	if(!DP_ADD_TEMP_VAL_DATA(device, ati_swgpio_info_leg))
 		return 0;
 	return 1;
 }
@@ -623,7 +477,8 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 	struct DevPropDevice	*device;
 	char			*devicepath;
 	char			*model;
-	char			*framebuffer;
+	const char		*framebuffer;
+	char			biosVersion[32];
 	char			tmp[64];
 	uint8_t			*rom = NULL;
 	uint32_t		rom_size = 0;
@@ -631,64 +486,74 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 	uint32_t		bios_size;
 	uint32_t		vram_size;
 	uint32_t		boot_display;
-	uint8_t			cmd;
 	bool			doit;
 	bool			toFree;
+	bool			evergreen = false;
 
 	devicepath = get_pci_dev_path(ati_dev);
-
-	cmd = pci_config_read8(ati_dev->dev.addr, 4);
-	verbose("old pci command - %x\n", cmd);
-	if (cmd == 0) {
-		pci_config_write8(ati_dev->dev.addr, 4, 6);	
-		cmd = pci_config_read8(ati_dev->dev.addr, 4);
-		verbose("new pci command - %x\n", cmd);
-	}
-
+	
+	vram_size = getvramsizekb(ati_dev);
 	model = get_ati_model((ati_dev->vendor_id << 16) | ati_dev->device_id);
-	framebuffer = get_ati_fb((ati_dev->vendor_id << 16) | ati_dev->device_id);
-	if (!string) {
+	verbose("%s %dMB [%04x:%04x] :: %s\n", model, (uint32_t)(vram_size / 1024), ati_dev->vendor_id, ati_dev->device_id, devicepath);
+
+	if ((framebuffer = getStringForKey(kAtiFb, &bootInfo->bootConfig))!=NULL)
+	{
+		verbose("Using custom FrameBuffer: %s\n", framebuffer);
+	}
+	else
+	{
+		framebuffer = get_ati_fb((ati_dev->vendor_id << 16) | ati_dev->device_id);
+		verbose("Using default FrameBuffer: %s\n", framebuffer);
+	}
+	
+	if (!string){
 		string = devprop_create_string();
 	}
+	
 	device = devprop_add_device(string, devicepath);
+	
 	if (!device) {
-		printf("Failed initializing dev-prop string dev-entry, press any key...\n");
+		verbose("Failed to initialize dev-props string dev-entry, press any key...\n");
 		getc();
 		return false;
 	}
 
-	/* FIXME: for primary graphics card only */
-	if (radeon_card_posted(ati_dev)) {
-		boot_display = 1;
+	if (strncmp(model, "ATI Radeon HD 4", 15) == 0) {
+		devprop_add_ati_template_shared(device);
+	} else if (strncmp(model, "ATI Radeon HD 5", 15) == 0) {
+		devprop_add_ati_template_shared(device);
+		devprop_add_ati_template_evergreen(device);
+		evergreen = true;
 	} else {
-		boot_display = 0;
+		devprop_add_ati_template_shared(device);
+		devprop_add_ati_template_leg(device);
+		devprop_add_iopciconfigspace(device, ati_dev);
 	}
-	verbose("boot display - %x\n", boot_display);
+	
+	vram_size = getvramsizekb(ati_dev) * 1024;
+	if ((vram_size > 0x80000000) || (vram_size == 0)) {
+		vram_size = 0x10000000;
+		verbose("VRAM reported wrong, defaulting to 256 mb\n");
+	}
+	devprop_add_value(device, "VRAM,totalsize", (uint8_t*)&vram_size, 4);
+	ati_vram_memsize_0.data[2] = (vram_size >> 16) & 0xFF; //4,5 are 0x00 anyway
+	ati_vram_memsize_0.data[3] = (vram_size >> 24) & 0xFF;
+	ati_vram_memsize_0.data[6] = (vram_size >> 16) & 0xFF; //4,5 are 0x00 anyway
+	ati_vram_memsize_0.data[7] = (vram_size >> 24) & 0xFF;
+	ati_vram_memsize_1.data[6] = (vram_size >> 16) & 0xFF; //4,5 are 0x00 anyway
+	ati_vram_memsize_1.data[7] = (vram_size >> 24) & 0xFF;
+	DP_ADD_TEMP_VAL_DATA(device, ati_vram_memsize_0);
+	DP_ADD_TEMP_VAL_DATA(device, ati_vram_memsize_1);
+	
+	if (devices_number == 1) {
+		boot_display = 1;
+	}
 	devprop_add_value(device, "@0,AAPL,boot-display", (uint8_t*)&boot_display, 4);
-
-	if((framebuffer[0] == 'M' && framebuffer[1] == 'o' && framebuffer[2] == 't') || 
-           (framebuffer[0] == 'S' && framebuffer[1] == 'h' && framebuffer[2] == 'r') || 
-           (framebuffer[0] == 'P' && framebuffer[1] == 'e' && framebuffer[2] == 'r')) //faster than strcmp ;)
-                devprop_add_ati_template_4xxx(device);
-	else {
-		devprop_add_ati_template(device);
-		vram_size = getvramsizekb(ati_dev) * 1024;
-		if ((vram_size > 0x80000000) || (vram_size == 0)) {
-			vram_size = 0x10000000;	//vram reported wrong, defaulting to 256 mb
-		}
-		devprop_add_value(device, "VRAM,totalsize", (uint8_t*)&vram_size, 4);
-		ati_vram_memsize_0.data[6] = (vram_size >> 16) & 0xFF; //4,5 are 0x00 anyway
-		ati_vram_memsize_0.data[7] = (vram_size >> 24) & 0xFF;		
-		ati_vram_memsize_1.data[6] = (vram_size >> 16) & 0xFF; //4,5 are 0x00 anyway
-		ati_vram_memsize_1.data[7] = (vram_size >> 24) & 0xFF;
-		DP_ADD_TEMP_VAL_DATA(device, ati_vram_memsize_0);
-		DP_ADD_TEMP_VAL_DATA(device, ati_vram_memsize_1);
-		devprop_add_iopciconfigspace(device, ati_dev);		
-	}
 	devprop_add_value(device, "model", (uint8_t*)model, (strlen(model) + 1));
 	devprop_add_value(device, "ATY,DeviceID", (uint8_t*)&ati_dev->device_id, 2);
 
 	//fb setup
+
 	sprintf(tmp, "Slot-%x",devices_number);
 	devprop_add_value(device, "AAPL,slot-name", (uint8_t*)tmp, strlen(tmp) + 1);
 	devices_number++;
@@ -711,42 +576,50 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 	sprintf(tmp, ati_name_1[1], framebuffer);
 	devprop_add_value(device, (char *) ati_name_1[0], (uint8_t *)tmp, strlen(tmp) + 1);
 
+	if (evergreen){
+		ati_vram_memsize_2.data[6] = (vram_size >> 16) & 0xFF; //4,5 are 0x00 anyway
+		ati_vram_memsize_2.data[7] = (vram_size >> 24) & 0xFF;
+		DP_ADD_TEMP_VAL_DATA(device, ati_vram_memsize_2);
+		
+		sprintf(tmp, ati_compatible_2[1], framebuffer);
+		devprop_add_value(device, (char *) ati_compatible_2[0], (uint8_t *)tmp, strlen(tmp) + 1);
+		
+		sprintf(tmp, ati_name_2[1], framebuffer);
+		devprop_add_value(device, (char *) ati_name_2[0], (uint8_t *)tmp, strlen(tmp) + 1);
+		
+		sprintf(tmp, ati_device_type_2[1], framebuffer);
+		devprop_add_value(device, (char *) ati_device_type_2[0], (uint8_t *)tmp, strlen(tmp) + 1);
+	}
+	
 	sprintf(tmp, "/Extra/%04x_%04x.rom", (uint16_t)ati_dev->vendor_id, (uint16_t)ati_dev->device_id);
 	if (getBoolForKey(kUseAtiROM, &doit, &bootInfo->bootConfig) && doit) {
-		verbose("looking for ati video bios file %s\n", tmp);
+		verbose("Looking for ATI Video BIOS File %s\n", tmp);
 		rom = malloc(0x20000);
 		rom_size = load_ati_bios_file(tmp, rom, 0x20000);
 		if (rom_size > 0) {
 			verbose("Using ATI Video BIOS File %s (%d Bytes)\n", tmp, rom_size);
+			toFree = true;
 			if (rom_size > 0x10000) {
 				rom_size = 0x10000; //we dont need rest anyway;
 			}
 		} else {
-			printf("ERROR: unable to open ATI Video BIOS File %s\n", tmp);
+			verbose("ERROR: unable to open ATI Video BIOS File %s\n", tmp);
 		}
 	}
+
 	if (rom_size == 0) {
-		if (boot_display) {		// no custom rom
-			bios = NULL;	// try to dump from legacy space, otherwise can result in 100% fan speed
+		if (radeon_card_posted(ati_dev)) {		
+			bios = (uint8_t *)0x000C0000; // try to dump from legacy space, otherwise can result in 100% fan speed
+			toFree = false;
 		} else {
-			// readAtomBios result in bug on some cards (100% fan speed and black screen),
-			// not using it for posted card, rading from legacy space instead
-			bios = readAtomBIOS(ati_dev);
+			bios = readAtomBIOS(ati_dev); // readAtomBios result in bug on some cards (100% fan speed and black screen)
+			toFree = true;
 		}
 	} else {
 		bios = rom;	//going custom rom way
-		verbose("Using rom %s\n", tmp);
-	}
-	if (bios == NULL) {
-		bios = (uint8_t *)0x000C0000;
-		toFree = false;
-		verbose("Not going to use bios image file\n");
-	} else {
-		toFree = true;
 	}
 
 	if (bios[0] == 0x55 && bios[1] == 0xaa) {
-		printf("Found bios image\n");
 		bios_size = bios[2] * 512;
 
 		struct  pci_rom_pci_header_t *rom_pci_header;
@@ -754,7 +627,7 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 
 		if (rom_pci_header->signature == 0x52494350) {
 			if (rom_pci_header->device != ati_dev->device_id) {
-				verbose("Bios image (%x) doesnt match card (%x), ignoring\n", rom_pci_header->device, ati_dev->device_id);
+				verbose("ATI Bios image (%x) doesnt match card (%x), ignoring\n", rom_pci_header->device, ati_dev->device_id);
 			} else {
 				if (toFree) {
 					verbose("Adding binimage to card %x from mmio space with size %x\n", ati_dev->device_id, bios_size);
@@ -767,8 +640,24 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 			verbose("Wrong pci header signature %x\n", rom_pci_header->signature);
 		}
 	} else {
-		verbose("Bios image not found at  %x, content %x %x\n", bios, bios[0], bios[1]);
+		verbose("ATI Bios image not found at  %x, content %x %x\n", bios, bios[0], bios[1]);
 	}
+	
+	// get bios version
+	uint8_t* version_str = NULL;
+	unsigned int i;
+	// only search the first 256 bytes
+	for(i = 0; i <= 256; i++) {
+		if(bios[i] == '1' && bios[i+1] == '1' && bios[i+2] == '3' && bios[i+3] == '-') {
+			// 113-  was found, extract bios version
+			version_str=bios+i+4;
+		}
+		if (version_str) 
+			sprintf(biosVersion, "%s", version_str);
+		}
+	sprintf(biosVersion, "113-%s", version_str);
+	devprop_add_value(device, "ATY,Rom#", (uint8_t*)biosVersion, strlen(biosVersion) + 1);
+	
 	if (toFree) {
 		free(bios);
 	}

@@ -42,5 +42,12 @@ struct ati_data_key {
 #define REG32R(reg)  ((volatile uint32_t *)regs)[(reg) >> 2]
 #define REG32W(reg, val)  ((volatile uint32_t *)regs)[(reg) >> 2] = (val)
 
+//Memory detection register
+#define R6XX_CONFIG_MEMSIZE	0x5428
+
+//Avivo registers
+#define AVIVO_D1CRTC_CONTROL				0x6080
+#define AVIVO_CRTC_EN						(1<<0)
+#define AVIVO_D2CRTC_CONTROL				0x6880
 
 #endif /* !__LIBSAIO_ATI_H */
