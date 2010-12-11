@@ -20,8 +20,8 @@
  *
  *  Alternatively you can choose to comply with APSL
  */
- 
- 
+
+
 #include "libsaio.h"
 #include "boot.h"
 #include "bootstruct.h"
@@ -35,14 +35,10 @@
 #endif
 
 #if DEBUG_ATI
-#define DBG(x...)	verbose(x)
+#define DBG(x...)	printf(x)
 #else
 #define DBG(x...)
 #endif
-
-#define MAX_NUM_DCB_ENTRIES 16
-
-#define TYPE_GROUPED 0xff
 
 extern uint32_t devices_number;
 
@@ -232,10 +228,10 @@ static uint32_t accessROM(pci_dt_t *ati_dev, unsigned int mode)
 {
 	uint32_t		bar[7];
 	volatile uint32_t	*regs;
-
+	
 	bar[2] = pci_config_read32(ati_dev->dev.addr, 0x18 );
 	regs = (uint32_t *) (bar[2] & ~0x0f);
-
+	
 	if (mode) {
 		if (mode != 1) {
 			return 0xe00002c7;
@@ -282,7 +278,7 @@ static uint8_t *readAtomBIOS(pci_dt_t *ati_dev)
 	uint32_t		*BIOSBase;
 	uint32_t		counter;
 	volatile uint32_t	*regs;
-
+	
 	bar[2] = pci_config_read32(ati_dev->dev.addr, 0x18 );
 	regs = (volatile uint32_t *) (bar[2] & ~0x0f);
 	accessROM(ati_dev, 0);
@@ -290,7 +286,7 @@ static uint8_t *readAtomBIOS(pci_dt_t *ati_dev)
 	REG32R(0xac);
 	REG32W(0xa8, 0);
 	REG32R(0xac);	
-
+	
 	BIOSBase = malloc(0x10000);
 	REG32W(0xa8, 0);
 	BIOSBase[0] = REG32R(0xac);
@@ -301,7 +297,7 @@ static uint8_t *readAtomBIOS(pci_dt_t *ati_dev)
 		counter +=4;
 	} while (counter != 0x10000);
 	accessROM((pci_dt_t *)regs, 1);
-
+	
 	if (*(uint16_t *)BIOSBase != 0xAA55) {
 		verbose("Wrong ATI BIOS signature: %04x\n", *(uint16_t *)BIOSBase);
 		return 0;
@@ -314,12 +310,11 @@ uint32_t getvramsizekb(pci_dt_t *ati_dev)
 	uint32_t		bar[7];
 	uint32_t		size;
 	volatile uint32_t	*regs;
-
+	
 	bar[2] = pci_config_read32(ati_dev->dev.addr, 0x18 );
 	regs = (uint32_t *) (bar[2] & ~0x0f);
-	if (ati_dev->device_id < 0x9400) {
-		size = (REG32R(R6XX_CONFIG_MEMSIZE) >> 10);
-		size = size * 1024 * 1024;
+	if ((ati_dev->device_id >= 0x6800) || (ati_dev->device_id <= 0x68FF)) {
+		size = (REG32R(R6XX_CONFIG_MEMSIZE) >> 10) * 1024 * 1024;
 	} else {
 		size = (REG32R(R6XX_CONFIG_MEMSIZE)) >> 10;
 	}
@@ -358,7 +353,7 @@ static uint32_t load_ati_bios_file(const char *filename, uint8_t *buf, int bufsi
 {
 	int	fd;
 	int	size;
-
+	
 	if ((fd = open_bvdev("bt(0,0)", filename, 0)) < 0) {
 		return 0;
 	}
@@ -375,7 +370,7 @@ static uint32_t load_ati_bios_file(const char *filename, uint8_t *buf, int bufsi
 static char *get_ati_model(uint32_t id)
 {
 	int	i;
-
+	
 	for (i=0; i< (sizeof(ATIKnownChipsets) / sizeof(ATIKnownChipsets[0])); i++) {
 		if (ATIKnownChipsets[i].device == id) {
 			return ATIKnownChipsets[i].name;
@@ -387,7 +382,7 @@ static char *get_ati_model(uint32_t id)
 static char *get_ati_fb(uint32_t id)
 {
 	int	i;
-
+	
 	for (i=0; i< (sizeof(ATIKnownFramebuffers) / sizeof(ATIKnownFramebuffers[0])); i++) {
 		if (ATIKnownFramebuffers[i].device == id) {
 			return ATIKnownFramebuffers[i].name;
@@ -400,7 +395,7 @@ static int devprop_add_iopciconfigspace(struct DevPropDevice *device, pci_dt_t *
 {
 	int	i;
 	uint8_t	*config_space;
-
+	
 	if (!device || !ati_dev) {
 		return 0;
 	}
@@ -489,13 +484,13 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 	bool			doit;
 	bool			toFree;
 	bool			evergreen = false;
-
+	
 	devicepath = get_pci_dev_path(ati_dev);
 	
 	vram_size = getvramsizekb(ati_dev);
 	model = get_ati_model((ati_dev->vendor_id << 16) | ati_dev->device_id);
 	verbose("%s %dMB [%04x:%04x] :: %s\n", model, (uint32_t)(vram_size / 1024), ati_dev->vendor_id, ati_dev->device_id, devicepath);
-
+	
 	if ((framebuffer = getStringForKey(kAtiFb, &bootInfo->bootConfig))!=NULL)
 	{
 		verbose("Using custom FrameBuffer: %s\n", framebuffer);
@@ -517,7 +512,7 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 		getc();
 		return false;
 	}
-
+	
 	if (strncmp(model, "ATI Radeon HD 4", 15) == 0) {
 		devprop_add_ati_template_shared(device);
 	} else if (strncmp(model, "ATI Radeon HD 5", 15) == 0) {
@@ -551,31 +546,31 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 	devprop_add_value(device, "@0,AAPL,boot-display", (uint8_t*)&boot_display, 4);
 	devprop_add_value(device, "model", (uint8_t*)model, (strlen(model) + 1));
 	devprop_add_value(device, "ATY,DeviceID", (uint8_t*)&ati_dev->device_id, 2);
-
+	
 	//fb setup
-
+	
 	sprintf(tmp, "Slot-%x",devices_number);
 	devprop_add_value(device, "AAPL,slot-name", (uint8_t*)tmp, strlen(tmp) + 1);
 	devices_number++;
-
+	
 	sprintf(tmp, ati_compatible_0[1], framebuffer);
 	devprop_add_value(device, (char *) ati_compatible_0[0], (uint8_t *)tmp, strlen(tmp) + 1);
-
+	
 	sprintf(tmp, ati_compatible_1[1], framebuffer);
 	devprop_add_value(device, (char *) ati_compatible_1[0], (uint8_t *)tmp, strlen(tmp) + 1);
-
+	
 	sprintf(tmp, ati_device_type[1], framebuffer);
 	devprop_add_value(device, (char *) ati_device_type[0], (uint8_t *)tmp, strlen(tmp) + 1);
-
+	
 	sprintf(tmp, ati_name[1], framebuffer);
 	devprop_add_value(device, (char *) ati_name[0], (uint8_t *)tmp, strlen(tmp) + 1);
-
+	
 	sprintf(tmp, ati_name_0[1], framebuffer);
 	devprop_add_value(device, (char *) ati_name_0[0], (uint8_t *)tmp, strlen(tmp) + 1);
-
+	
 	sprintf(tmp, ati_name_1[1], framebuffer);
 	devprop_add_value(device, (char *) ati_name_1[0], (uint8_t *)tmp, strlen(tmp) + 1);
-
+	
 	if (evergreen){
 		ati_vram_memsize_2.data[6] = (vram_size >> 16) & 0xFF; //4,5 are 0x00 anyway
 		ati_vram_memsize_2.data[7] = (vram_size >> 24) & 0xFF;
@@ -606,7 +601,7 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 			verbose("ERROR: unable to open ATI Video BIOS File %s\n", tmp);
 		}
 	}
-
+	
 	if (rom_size == 0) {
 		if (radeon_card_posted(ati_dev)) {		
 			bios = (uint8_t *)0x000C0000; // try to dump from legacy space, otherwise can result in 100% fan speed
@@ -618,13 +613,13 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 	} else {
 		bios = rom;	//going custom rom way
 	}
-
+	
 	if (bios[0] == 0x55 && bios[1] == 0xaa) {
 		bios_size = bios[2] * 512;
-
+		
 		struct  pci_rom_pci_header_t *rom_pci_header;
 		rom_pci_header = (struct pci_rom_pci_header_t*)(bios + bios[24] + bios[25]*256);
-
+		
 		if (rom_pci_header->signature == 0x52494350) {
 			if (rom_pci_header->device != ati_dev->device_id) {
 				verbose("ATI Bios image (%x) doesnt match card (%x), ignoring\n", rom_pci_header->device, ati_dev->device_id);
@@ -654,7 +649,7 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 		}
 		if (version_str) 
 			sprintf(biosVersion, "%s", version_str);
-		}
+	}
 	sprintf(biosVersion, "113-%s", version_str);
 	devprop_add_value(device, "ATY,Rom#", (uint8_t*)biosVersion, strlen(biosVersion) + 1);
 	
@@ -664,6 +659,6 @@ bool setup_ati_devprop(pci_dt_t *ati_dev)
 	stringdata = malloc(sizeof(uint8_t) * string->length);
 	memcpy(stringdata, (uint8_t*)devprop_generate_string(string), string->length);
 	stringlength = string->length;
-
+	
 	return true;
 }
